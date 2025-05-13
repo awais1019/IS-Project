@@ -9,8 +9,8 @@ const AdminDashboardPage = React.lazy(
   () => import("./pages/AdminDashboardPage")
 );
 const SignUp = React.lazy(() => import("./components/SignUp"));
-const StudentDashboard = React.lazy(
-  () => import("./components/StudentDashboard")
+const UserDashboard = React.lazy(
+  () => import("./components/UserDashboard")
 );
 
 export function App() {
@@ -30,7 +30,7 @@ export function App() {
           >
             {customRoute("admin-home", <AdminDashboardPage />, ["admin"])}
             {customRoute("admin-loading", <p>loadingbar....</p>, ["admin"])}
-            {customRoute("student-home", <StudentDashboard />, ["student"])}
+            {customRoute("user-home", <UserDashboard />, ["user"])}
           </Route>
         </Routes>
       </Suspense>

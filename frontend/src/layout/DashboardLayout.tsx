@@ -10,7 +10,7 @@ const AdminSidebarLinks = [
   { label: "Users", path: "/dashboard/admins", icon: BsPeople },
 ];
 const StudentSidebarLinks = [
-  { label: "Dashboard", path: "/dashboard/student-home", icon: Bs0Circle },
+  { label: "Dashboard", path: "/dashboard/user-home", icon: Bs0Circle },
   { label: "Home", path: "admin", icon: BsHouse },
   { label: "Student", path: "admin", icon: BsPeople },
 ];
@@ -22,7 +22,7 @@ export default function DashboardLayout() {
     role === "admin" ? AdminSidebarLinks : StudentSidebarLinks;
     const location = useLocation();
   const isAtRoot = location.pathname === "/dashboard";
-  const path=role==="admin"? "admin-home" : "student-home"
+  const path=role==="admin"? "admin-home" : "user-home"
   return (
     <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-[10px] h-screen w-screen">
       <Sidebar sidebarLinks={sidebarLinks} />

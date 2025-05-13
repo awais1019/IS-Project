@@ -11,6 +11,7 @@ import {
   passwordSchema,
 } from "../schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { signupUser } from "../services/authService";
 
 const signupSchema = z
   .object({
@@ -31,9 +32,18 @@ export default function SignUp() {
   const navigate = useNavigate();
   const [error, setError] = useState("");
   const onSubmit = async (data: FieldValues) => {
-    setError("make signup endpoint in backend");
-    console.log(data);
-    navigate("/");
+    try {
+      const { name, email, password } = data;
+      const response = await signupUser(name, email, password);
+      console.log(response); 
+      navigate("/"); 
+    } catch (err: unknown) {
+      if(err instanceof Error)
+      {
+        setError(err.message || "Signup failed");
+
+      }
+    }
   };
   const {
     register,
