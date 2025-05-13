@@ -1,0 +1,9 @@
+/* @import "tailwindcss";
+
+.container{
+    @apply  rounded-[20px]  flex justify-center w-screen h-screen md:bg-white md:opacity-[80%] md:border-gray-300 md:border-1;
+}
+
+.label{
+    @apply font-primary font-thin text-[16px];
+} */

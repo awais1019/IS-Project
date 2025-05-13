@@ -1,35 +1,39 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Route, Routes } from "react-router-dom";
+import React, { Suspense } from "react";
+import { customRoute } from "./lib/util";
+import DashboardLayout from "./layout/DashboardLayout";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
-function App() {
-  const [count, setCount] = useState(0)
+const Login = React.lazy(() => import("./components/login/Login"));
+const AdminDashboardPage = React.lazy(
+  () => import("./pages/AdminDashboardPage")
+);
+const SignUp = React.lazy(() => import("./components/SignUp"));
+const StudentDashboard = React.lazy(
+  () => import("./components/StudentDashboard")
+);
 
+export function App() {
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <Suspense fallback={<p>LodingBar...</p>}>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/register" element={<SignUp />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={["admin", "student"]}>
+                <DashboardLayout />
+              </ProtectedRoute>
+            }
+          >
+            {customRoute("admin-home", <AdminDashboardPage />, ["admin"])}
+            {customRoute("admin-loading", <p>loadingbar....</p>, ["admin"])}
+            {customRoute("student-home", <StudentDashboard />, ["student"])}
+          </Route>
+        </Routes>
+      </Suspense>
     </>
-  )
+  );
 }
-
-export default App
