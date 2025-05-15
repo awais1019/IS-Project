@@ -17,17 +17,17 @@ const StudentSidebarLinks = [
 
 export default function DashboardLayout() {
    
-  const role = useAuthStore((s) => s.role);
+  const user = useAuthStore((s) => s.user);
   const sidebarLinks =
-    role === "admin" ? AdminSidebarLinks : StudentSidebarLinks;
+    user?.role === "admin" ? AdminSidebarLinks : StudentSidebarLinks;
     const location = useLocation();
   const isAtRoot = location.pathname === "/dashboard";
-  const path=role==="admin"? "admin-home" : "user-home"
+  const path=user?.role==="admin"? "admin-home" : "user-home"
   return (
     <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-[10px] h-screen w-screen">
-      <Sidebar sidebarLinks={sidebarLinks} />
+      <Sidebar  sidebarLinks={sidebarLinks} />
       <main>
-        <Header />
+        <Header user={user} />
         {isAtRoot ?  <Navigate to={path} replace /> :   <Outlet /> }
      
       </main>

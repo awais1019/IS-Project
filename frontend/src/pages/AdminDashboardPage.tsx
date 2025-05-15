@@ -1,3 +1,7 @@
+import NewsClassifier from "../components/AdminDashboard";
+
 export default function AdminDashboardPage() {
-  return <div>Admin Page</div>;
+ return (
+  <NewsClassifier/>
+ )
 }

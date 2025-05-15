@@ -2,11 +2,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type FieldValues } from "react-hook-form";
 import { z } from "zod";
 
-
-
 import { useState } from "react";
 
 import { emailSchema, passwordSchema } from "../../schema";
+
+import { login } from "../../services/authService";
+import { useNavigate } from "react-router";
 
 const loginSchema = z.object({
   email: emailSchema,
@@ -16,13 +17,19 @@ const loginSchema = z.object({
 export type FormData = z.infer<typeof loginSchema>;
 
 export default function Login() {
-
-
   const [error, setError] = useState("");
+    const navigate = useNavigate();
   const onSubmit = async (data: FieldValues) => {
-    setError("make login endpoint in backend")
-    console.log(data)
-  };
+    try {
+      await login(data.email, data.password);
+      navigate('/dashboard');
+    } catch (err: unknown) {
+      if(err instanceof Error)
+      {
+        setError(err.message || "Signup failed");
+
+      }
+  }};
   const {
     register,
     handleSubmit,
@@ -41,7 +48,7 @@ export default function Login() {
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col w-screen h-screen p-[clamp(24px,2vw,36px)] gap-[clamp(12px,2vw,24px)] md:bg-white md:opacity-[90%] md:border-gray-300 md:border justify-center md:w-[clamp(500px,3vw,900px)] md:h-[clamp(430px,2vh,800px)] md:rounded-[6px] font-primary"
       >
-        <div>
+        <div> 
           <h1 className="font-bold font-primary text-[24px] text-blue">
             Welcome Back
           </h1>

@@ -7,8 +7,11 @@ type ProtectedRouteProps = {
 };
 
 export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
-  const { role } = useAuthStore();
-  if (!role || !allowedRoles.includes(role)) {
+  const user = useAuthStore((state=>state.user));
+//   if(!user?.verify){
+//  return <Navigate to="/2fa" replace />;
+//   }
+  if (!user?.role || !allowedRoles.includes(user.role)) {
     return <Navigate to="/" replace />;
   }
 
