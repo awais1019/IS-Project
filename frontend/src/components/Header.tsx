@@ -7,14 +7,14 @@ type HeaderProps = {
 
 export default function Header({ user }: HeaderProps) {
   return (
-    <header className="flex items-center justify-between px-6 py-4 bg-white shadow-md border-b border-gray-200">
-      {/* Left: Logo/Icon */}
+    <header className="flex items-center rounded-[10px] justify-between px-6 py-4 bg-white shadow-md border-b border-gray-200">
+ 
       <div className="flex items-center gap-2">
-        <FaBrain className="text-2xl text-orange-500" />
+        <FaBrain className="text-2xl text-blue" />
         <span className="text-xl font-semibold text-gray-800">SentimentPulse</span>
       </div>
 
-      {/* Right: User Info */}
+
       <div className="flex items-center gap-3">
         <img
           src="https://randomuser.me/api/portraits/men/32.jpg"
@@ -29,7 +29,7 @@ export default function Header({ user }: HeaderProps) {
           {user && (
             <>
               <p className="text-xs text-gray-500">{user.email}</p>
-              <p className="text-xs text-orange-500 font-semibold capitalize">
+              <p className="text-xs text-blue font-semibold capitalize">
                 {user.role}
               </p>
             </>

@@ -10,20 +10,26 @@ export const ProtectedRoute = ({
   children,
   allowedRoles,
 }: ProtectedRouteProps) => {
-  const user = useAuthStore((state) => state.user); 
+ const { user, is2FAVerified} = useAuthStore();
+
+if (user?.is2FAEnabled && !is2FAVerified) {
+  return <Navigate to="/verify-otp" replace />;
+}
 
   if (!user) {
     return <div>Loading...</div>; 
   }
-
-
-  if (user.role === "user" && !user.verify) {
-    return <Navigate to="/verify-otp" replace />;
-  }
-
   if (!allowedRoles.includes(user.role)) {
     return <Navigate to="/" replace />;
   }
+
+  
+  if (user.role === "user" && !user.verify) {
+    return <Navigate to="/verify-otp" replace />;
+  }
+  
+
+
 
   return <>{children}</>; 
 };

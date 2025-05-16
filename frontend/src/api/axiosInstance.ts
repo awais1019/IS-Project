@@ -14,7 +14,5 @@ axiosInstance.interceptors.request.use((config) => {
 });
 
 export default axiosInstance;
-export const flaskInstance = axios.create({
-  baseURL: 'http://localhost:5001',
-});
+
 

@@ -3,7 +3,7 @@ import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import { sendOTP,generateOTP } from '../utils/sendOTP.js';
 
-
+import { spawn } from 'child_process';
 export const signup = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -16,7 +16,6 @@ export const signup = async (req, res) => {
     email,
     password: hashed,
     role: 'user', 
-    verified: false
   });
 
   await newUser.save();
@@ -48,7 +47,8 @@ export const login= async(req, res) => {
         email: user.email,
         name:user.name,
         role: user.role,
-        verify: user.verify
+        verify: user.verify,
+        is2FAEnabled:user.is2FAEnabled
       },
     });
   } catch (error) {
@@ -104,8 +104,8 @@ export const verifyOtp = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-// controllers/authController.js
-import { spawn } from 'child_process';
+
+
 
 export const analyzeText = (req, res) => {
   let text = req.body.text;
@@ -136,7 +136,7 @@ export const analyzeText = (req, res) => {
     try {
       const parsedResult = JSON.parse(result.trim());
       res.json({
-        user: req.user,  // info from authenticateJWT
+        user: req.user, 
         result: parsedResult,
       });
     } catch (e) {
@@ -144,4 +144,32 @@ export const analyzeText = (req, res) => {
       res.status(500).json({ error: 'Invalid sentiment result format.' });
     }
   });
+};
+
+export const toggle2FA = async (req, res) => {
+  try {
+    const userId = req.user.id; // From JWT middleware
+    const user = await User.findById(userId);
+
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    user.is2FAEnabled = !user.is2FAEnabled;
+    await user.save();
+
+    // Generate a new token with updated is2FAEnabled field
+    const updatedToken = jwt.sign(
+      { id: user._id, role: user.role, is2FAEnabled: user.is2FAEnabled },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+
+    res.status(200).json({
+      message: `2FA ${user.is2FAEnabled ? 'enabled' : 'disabled'}`,
+      is2FAEnabled: user.is2FAEnabled,
+      token: updatedToken // new token with updated 2FA state
+    });
+  } catch (error) {
+    console.error('Error toggling 2FA:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 };

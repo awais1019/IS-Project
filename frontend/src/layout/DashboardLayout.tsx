@@ -3,17 +3,16 @@ import Header from "../components/Header";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { Bs0Circle, BsHouse, BsPeople } from "react-icons/bs";
 import { useAuthStore } from "../stores/useAuthStore";
-
+import { FaBrain } from "react-icons/fa";
+import { MdHistory } from "react-icons/md";
 const AdminSidebarLinks = [
-  { label: "Dashboard", path: "admin-home", icon: Bs0Circle },
-  { label: "Home", path: "/dashboard/admin-loading", icon: BsHouse },
-  { label: "Users", path: "/dashboard/admins", icon: BsPeople },
+  { label: "Analyze", path: "admin-home", icon: FaBrain },
+  { label: "Users", path: "/dashboard/admin-loading", icon: BsPeople },
 ];
 const StudentSidebarLinks = [
-  { label: "Dashboard", path: "/dashboard/user-home", icon: Bs0Circle },
-  { label: "Home", path: "admin", icon: BsHouse },
-  { label: "Student", path: "admin", icon: BsPeople },
-];
+  { label: "Analyze", path: "/dashboard/user-home", icon: FaBrain },
+  { label: "History", path: "/dashboard/user-history", icon: MdHistory },
+]
 
 export default function DashboardLayout() {
    
@@ -24,7 +23,7 @@ export default function DashboardLayout() {
   const isAtRoot = location.pathname === "/dashboard";
   const path=user?.role==="admin"? "admin-home" : "user-home"
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-[10px] h-screen w-screen">
+    <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-[3px] h-screen w-screen">
       <Sidebar  sidebarLinks={sidebarLinks} />
       <main>
         <Header user={user} />

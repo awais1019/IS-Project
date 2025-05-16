@@ -15,9 +15,9 @@ export default function SidebarItem({ icon: Icon, label, path }: SidebarItemProp
       <NavLink
         to={path}
         className={({ isActive }) =>
-          `flex items-center gap-3 px-2 py-2 rounded-lg transition-colors duration-200 ${
+          `flex items-center gap-3 px-2 py-2 transition-colors duration-200 rounded-[20px] ${
             isActive
-              ? "bg-orange-100 text-orange-600 font-semibold shadow-inner"
+              ? "bg-blue text-white font-semibold shadow-inner"
               : "text-gray-700 hover:bg-gray-100"
           }`
         }

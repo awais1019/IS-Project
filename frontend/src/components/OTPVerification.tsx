@@ -1,75 +1,77 @@
-import { useEffect, useState } from 'react'
-import { useAuthStore } from '../stores/useAuthStore'
-import { useNavigate } from 'react-router'
+import { useEffect, useState } from "react";
+import { useAuthStore } from "../stores/useAuthStore";
+import { useNavigate } from "react-router";
 
 export default function OTPVerification() {
-  const user = useAuthStore((state) => state.user)
-  const email = user?.email
-   const navigate = useNavigate();
-  const [otp, setOtp] = useState('')
-  const [resendDisabled, setResendDisabled] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
+  const user = useAuthStore((state) => state.user);
+  const { set2FAVerified } = useAuthStore();
+  const email = user?.email;
+  const navigate = useNavigate();
+  const [otp, setOtp] = useState("");
+  const [resendDisabled, setResendDisabled] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     if (email) {
-      handleSendOTP()
+      handleSendOTP();
     }
-  }, [email])
+  }, []);
 
   const handleSendOTP = async () => {
     try {
-      setLoading(true)
-      const res = await fetch('http://localhost:5000/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      setLoading(true);
+      const res = await fetch("http://localhost:5000/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
-      })
+      });
 
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to send OTP')
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to send OTP");
 
-      setError('')
+      setError("");
     } catch (err: any) {
-      setError(err.message)
+      setError(err.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleVerifyOTP = async (e: React.FormEvent) => {
-    e.preventDefault()
-     
-    try {
-      setLoading(true)
-      const res = await fetch('http://localhost:5000/verify-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, otp }),
-      })
+    e.preventDefault();
 
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Invalid OTP')
+    try {
+      setLoading(true);
+      const res = await fetch("http://localhost:5000/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Invalid OTP");
       useAuthStore.getState().updateUser({ verify: true });
-      navigate("/dashboard")
-      setSuccess(true)
-      setError('')
+      set2FAVerified(true);
+      navigate("/dashboard");
+      setSuccess(true);
+      setError("");
     } catch (err: any) {
-      setError(err.message)
-      setSuccess(false)
+      setError(err.message);
+      setSuccess(false);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleResend = () => {
     if (!resendDisabled) {
-      handleSendOTP()
-      setResendDisabled(true)
-      setTimeout(() => setResendDisabled(false), 30000) 
+      handleSendOTP();
+      setResendDisabled(true);
+      setTimeout(() => setResendDisabled(false), 300000);
     }
-  }
+  };
 
   return (
     <div className="w-screen h-screen flex justify-center overflow-y-auto md:items-center">
@@ -102,7 +104,7 @@ export default function OTPVerification() {
 
         <input
           type="submit"
-          value={loading ? 'Verifying...' : 'Verify OTP'}
+          value={loading ? "Verifying..." : "Verify OTP"}
           disabled={loading}
           className="w-full bg-blue p-2 rounded-[10px] text-[16px] font-primary font-semibold text-white"
         />
@@ -113,7 +115,7 @@ export default function OTPVerification() {
           disabled={loading || resendDisabled}
           className="w-full border border-blue text-blue p-2 rounded-[10px] text-[16px] font-primary font-semibold"
         >
-          {resendDisabled ? 'Resend Disabled' : 'Resend OTP'}
+          {resendDisabled ? "Resend Disabled" : "Resend OTP"}
         </button>
 
         {error && (
@@ -128,5 +130,5 @@ export default function OTPVerification() {
         )}
       </form>
     </div>
-  )
+  );
 }
