@@ -1,3 +1,4 @@
+import { verify } from 'crypto';
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
@@ -5,7 +6,8 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, default: 'user' }, 
-  verified: { type: Boolean, default: false },
+  verify: { type: Boolean, default: false },
+  TwoFactorAuth: { type: Boolean, default: false },
   otp: { type: String }, // hashed OTP
   otpExpires: { type: Date }
 });

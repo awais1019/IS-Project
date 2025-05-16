@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
+import { sendOTP,generateOTP } from '../utils/sendOTP.js';
 
 
 export const signup = async (req, res) => {
@@ -47,7 +48,7 @@ export const login= async(req, res) => {
         email: user.email,
         name:user.name,
         role: user.role,
-        verified: user.verified
+        verify: user.verify
       },
     });
   } catch (error) {
@@ -55,34 +56,92 @@ export const login= async(req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-export const sendOTPToEmail = async (req, res) => {
-  const { email } = req.body;
-  const user = await User.findOne({ email });
+export const sendOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email is required' });
 
-  if (!user) return res.status(404).json({ message: 'User not found' });
+    const otp = generateOTP(); // utility function to generate 6-digit OTP
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
 
-  const otp = crypto.randomInt(100000, 999999).toString();
-  user.otp = otp;
-  user.otpExpiry = Date.now() + 10 * 60 * 1000; // valid for 10 mins
-  await user.save();
+    let user = await User.findOne({ email });
+    if (!user) {
+      user = new User({ email, verify: false });
+    }
 
-  await sendOTP(email, otp);
-  res.json({ message: 'OTP sent to email' });
-};
+    user.otp = otp;
+    user.otpExpires = otpExpiry;
+    await user.save();
 
-// Verify OTP
-export const verifyOTP = async (req, res) => {
-  const { email, otp } = req.body;
-  const user = await User.findOne({ email });
+    await sendOTP(email, otp); // utility function to send email
 
-  if (!user || user.otp !== otp || user.otpExpiry < Date.now()) {
-    return res.status(400).json({ message: 'Invalid or expired OTP' });
+    res.json({ message: 'OTP sent to your email' });
+  } catch (error) {
+    console.error('Error in sendOtp:', error);
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   }
+};
+export const verifyOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) return res.status(400).json({ error: 'Email and OTP are required' });
 
-  user.verified = true;
-  user.otp = null;
-  user.otpExpiry = null;
-  await user.save();
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (user.verify) return res.json({ message: 'User already verified' });
 
-  res.json({ message: 'Account verified successfully' });
+    if (user.otp !== otp) return res.status(400).json({ error: 'Invalid OTP' });
+    if (user.otpExpires < new Date()) return res.status(400).json({ error: 'OTP expired' });
+
+    user.verify = true;
+    user.otp = null;
+    user.otpExpires = null;
+    await user.save();
+
+    res.json({ message: 'Email verified successfully' });
+  } catch (error) {
+    console.error('Error in verifyOtp:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+// controllers/authController.js
+import { spawn } from 'child_process';
+
+export const analyzeText = (req, res) => {
+  let text = req.body.text;
+  if (!text) return res.status(400).json({ error: 'Text is required' });
+
+  const maxWords = 512;
+  text = text.split(' ').slice(0, maxWords).join(' ');
+
+  const python = spawn('python', ['sentiment.py', text]);
+
+  let result = '';
+  let errorOutput = '';
+
+  python.stdout.on('data', (data) => {
+    result += data.toString();
+  });
+
+  python.stderr.on('data', (data) => {
+    errorOutput += data.toString();
+  });
+
+  python.on('close', (code) => {
+    if (code !== 0) {
+      console.error('Python error:', errorOutput);
+      return res.status(500).json({ error: 'Sentiment analysis failed.' });
+    }
+
+    try {
+      const parsedResult = JSON.parse(result.trim());
+      res.json({
+        user: req.user,  // info from authenticateJWT
+        result: parsedResult,
+      });
+    } catch (e) {
+      console.error('Parsing error:', e);
+      res.status(500).json({ error: 'Invalid sentiment result format.' });
+    }
+  });
 };

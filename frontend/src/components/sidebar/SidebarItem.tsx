@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink} from "react-router-dom";
 import type { IconType } from "react-icons";
 
 export type SidebarItemProps = {
@@ -8,21 +8,22 @@ export type SidebarItemProps = {
 };
 
 export default function SidebarItem({ icon: Icon, label, path }: SidebarItemProps) {
-  const location=useLocation();
-  const pathname=location.pathname
-  console.log(pathname)
+
+
   return (
     <li>
       <NavLink
         to={path}
         className={({ isActive }) =>
-          `flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 ${
-            isActive ? "text-red-800 bg-gray-200 font-semibold" : "text-black font-normal"
+          `flex items-center gap-3 px-2 py-2 rounded-lg transition-colors duration-200 ${
+            isActive
+              ? "bg-orange-100 text-orange-600 font-semibold shadow-inner"
+              : "text-gray-700 hover:bg-gray-100"
           }`
         }
       >
-        <Icon className="text-xl" />
-        <span className="text-sm">{label}</span>
+        <Icon className="text-lg" />
+        <span className="text-sm tracking-wide">{label}</span>
       </NavLink>
     </li>
   );

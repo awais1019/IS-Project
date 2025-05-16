@@ -4,8 +4,8 @@ import { customRoute } from "./lib/util";
 import DashboardLayout from "./layout/DashboardLayout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import Login from "./components/login/Login";
-import { TwoFactorForm } from "./2fa";
-// import {TwoFactorForm} from "./2fa";
+import OTPVerification from "./components/OTPVerification";
+
 
 
 const AdminDashboardPage = React.lazy(
@@ -23,7 +23,8 @@ export function App() {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/register" element={<SignUp />} />
-          {customRoute("/2fa", <TwoFactorForm />, ["user"])}
+          <Route path="/verify-otp" element={<OTPVerification />} />
+    
           <Route
             path="/dashboard"
             element={

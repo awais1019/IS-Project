@@ -2,6 +2,7 @@ import axios from 'axios';
 import api, { flaskInstance } from '../api/axiosInstance';
 import { useAuthStore } from '../stores/useAuthStore';
 import type {  ResultProps } from '../components/AdminDashboard';
+import axiosInstance from '../api/axiosInstance';
 
 
 
@@ -43,54 +44,20 @@ export const login = async (email: string, password: string) => {
 };
 
 
+
 export const analyzeText = async (text: string): Promise<ResultProps> => {
   try {
-    const response = await fetch('http://localhost:5000/analyze', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ text }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Unknown error");
-    }
-
-    const data = await response.json();
-    return data.result;
-  } catch (error: unknown) {
-    console.error("Error calling /analyze:", error);
-    throw new Error("Analysis failed");
+    const response = await axiosInstance.post('/auth/analyze', { text });
+    // axios automatically parses JSON response
+    return response.data.result;
+  } catch (error: any) {
+    const errorMsg = error.response?.data?.error || error.message || 'Unknown error';
+    console.error("Error calling /analyze:", errorMsg);
+    throw new Error("Analysis failed: " + errorMsg);
   }
 };
 
-export const sendOtp = async (email:string) => {
-  await api.post(`auth/send-otp`, { email });
-};
-
-export const verifyOtp = async (data) => {
-  await api.post(`auth/verify-otp`, data);
-};
 
 
 
 
-// export const classifyNews = async (newsText) => {
-//   try {
-//     const response = await axios.post('http://127.0.0.1:5000/classify', {
-//       news_text: newsText,
-//     });
-
-//     // Handle the response from Flask
-//     console.log('Response:', response.data);  // { label: 'REAL', logits: [...] }
-
-//     // You can access the label here
-//     const { label } = response.data;
-//     alert(`The news is classified as: ${label}`);
-//   } catch (error) {
-//     console.error('Error during classification:', error);
-//     alert('Classification failed.');
-//   }
-// };
