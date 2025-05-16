@@ -17,7 +17,7 @@ export default function OTPVerification() {
     if (email) {
       handleSendOTP();
     }
-  }, []);
+  }, [email]);
 
   const handleSendOTP = async () => {
     try {

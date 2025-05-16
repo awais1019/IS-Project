@@ -7,7 +7,7 @@ import { FaBrain } from "react-icons/fa";
 import { MdHistory } from "react-icons/md";
 const AdminSidebarLinks = [
   { label: "Analyze", path: "admin-home", icon: FaBrain },
-  { label: "Users", path: "/dashboard/admin-loading", icon: BsPeople },
+  { label: "Users", path: "/dashboard/all-users-data", icon: BsPeople },
 ];
 const StudentSidebarLinks = [
   { label: "Analyze", path: "/dashboard/user-home", icon: FaBrain },

@@ -2,8 +2,10 @@ import bcrypt from 'bcrypt';
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import { sendOTP,generateOTP } from '../utils/sendOTP.js';
-
 import { spawn } from 'child_process';
+import AnalysisResult from '../models/AnalysisResult.js';
+
+
 export const signup = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -107,44 +109,44 @@ export const verifyOtp = async (req, res) => {
 
 
 
-export const analyzeText = (req, res) => {
-  let text = req.body.text;
-  if (!text) return res.status(400).json({ error: 'Text is required' });
+// export const analyzeText = (req, res) => {
+//   let text = req.body.text;
+//   if (!text) return res.status(400).json({ error: 'Text is required' });
 
-  const maxWords = 512;
-  text = text.split(' ').slice(0, maxWords).join(' ');
+//   const maxWords = 512;
+//   text = text.split(' ').slice(0, maxWords).join(' ');
 
-  const python = spawn('python', ['sentiment.py', text]);
+//   const python = spawn('python', ['sentiment.py', text]);
 
-  let result = '';
-  let errorOutput = '';
+//   let result = '';
+//   let errorOutput = '';
 
-  python.stdout.on('data', (data) => {
-    result += data.toString();
-  });
+//   python.stdout.on('data', (data) => {
+//     result += data.toString();
+//   });
 
-  python.stderr.on('data', (data) => {
-    errorOutput += data.toString();
-  });
+//   python.stderr.on('data', (data) => {
+//     errorOutput += data.toString();
+//   });
 
-  python.on('close', (code) => {
-    if (code !== 0) {
-      console.error('Python error:', errorOutput);
-      return res.status(500).json({ error: 'Sentiment analysis failed.' });
-    }
+//   python.on('close', (code) => {
+//     if (code !== 0) {
+//       console.error('Python error:', errorOutput);
+//       return res.status(500).json({ error: 'Sentiment analysis failed.' });
+//     }
 
-    try {
-      const parsedResult = JSON.parse(result.trim());
-      res.json({
-        user: req.user, 
-        result: parsedResult,
-      });
-    } catch (e) {
-      console.error('Parsing error:', e);
-      res.status(500).json({ error: 'Invalid sentiment result format.' });
-    }
-  });
-};
+//     try {
+//       const parsedResult = JSON.parse(result.trim());
+//       res.json({
+//         user: req.user, 
+//         result: parsedResult,
+//       });
+//     } catch (e) {
+//       console.error('Parsing error:', e);
+//       res.status(500).json({ error: 'Invalid sentiment result format.' });
+//     }
+//   });
+// };
 
 export const toggle2FA = async (req, res) => {
   try {
@@ -171,5 +173,85 @@ export const toggle2FA = async (req, res) => {
   } catch (error) {
     console.error('Error toggling 2FA:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+
+export const analyzeText = async (req, res) => {
+  let text = req.body.text;
+  const user = req.user;
+
+  if (!text) return res.status(400).json({ error: 'Text is required' });
+  const maxWords = 512;
+  text = text.split(' ').slice(0, maxWords).join(' ');
+
+  const python = spawn('python', ['sentiment.py', text]);
+  let result = '';
+  let errorOutput = '';
+
+  python.stdout.on('data', (data) => {
+    result += data.toString();
+  });
+
+  python.stderr.on('data', (data) => {
+    errorOutput += data.toString();
+  });
+
+  python.on('close', async (code) => {
+    if (code !== 0) {
+      console.error('Python error:', errorOutput);
+      return res.status(500).json({ error: 'Sentiment analysis failed.' });
+    }
+
+    try {
+      const parsedResult = JSON.parse(result.trim());
+
+     
+      if (user?.role === 'user') {
+        await AnalysisResult.create({
+          userId: user.id,
+          text,
+          label: parsedResult.label,
+          score: parsedResult.score,
+        });
+      }
+
+      res.json({
+        user,
+        result: parsedResult,
+      });
+    } catch (e) {
+      console.error('Parsing error:', e);
+      res.status(500).json({ error: 'Invalid sentiment result format.' });
+    }
+  });
+};
+
+
+
+
+export const getUserHistory = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const history = await AnalysisResult.find({ userId: id }).sort({ createdAt: -1 });
+    res.json(history);
+  } catch (err) {
+    console.error('Error fetching user history:', err);
+    res.status(500).json({ error: 'Failed to get history' });
+  }
+};
+
+
+export const getAllHistories = async (req, res) => {
+  try {
+    const allHistories = await AnalysisResult.find()
+      .populate('userId', 'name email role') 
+      .sort({ createdAt: -1 });
+
+    res.json(allHistories);
+  } catch (err) {
+    console.error('Error fetching all histories:', err);
+    res.status(500).json({ error: 'Failed to get histories' });
   }
 };

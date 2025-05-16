@@ -1,7 +1,8 @@
-import NewsClassifier from "../components/AdminDashboard";
+import AnalyzeText from "../components/AdminDashboard";
+
 
 export default function AdminDashboardPage() {
  return (
-  <NewsClassifier/>
+  <AnalyzeText/>
  )
 }

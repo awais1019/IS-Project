@@ -17,3 +17,10 @@ export const authenticateJWT = (req, res, next) => {
     return res.status(403).json({ error: 'Invalid or expired token' });
   }
 };
+// middlewares/authorizeAdmin.js
+export const authorizeAdmin = (req, res, next) => {
+  if (req.user?.role !== 'admin') {
+    return res.status(403).json({ error: 'Access denied. Admins only.' });
+  }
+  next();
+};

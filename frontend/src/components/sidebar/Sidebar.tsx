@@ -47,12 +47,16 @@ export default function Sidebar({ sidebarLinks }: SidebarProps) {
 
       {/* Bottom fixed section */}
       <div className="space-y-4">
-        <li className="flex items-center justify-between p-2 rounded hover:bg-gray-100 cursor-pointer list-none">
+        <li
+          className="flex items-center justify-between p-2 rounded hover:bg-gray-100 cursor-pointer list-none"
+          onClick={() => !loading && handleToggle2FA()}
+        >
           <div className="flex items-center space-x-2">
             <FiShield className="text-gray-600" size={20} />
             <span>Two-Factor Authentication</span>
           </div>
           <Switch
+            onClick={(e) => e.stopPropagation()} // prevent li click firing
             onChange={handleToggle2FA}
             checked={user?.is2FAEnabled ?? false}
             disabled={loading}

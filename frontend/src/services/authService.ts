@@ -4,6 +4,17 @@ import { useAuthStore } from '../stores/useAuthStore';
 import type {  ResultProps } from '../components/AdminDashboard';
 
 
+import type { User } from "../stores/useAuthStore";
+
+
+export interface HistoryItem {
+  id: string;
+  text: string;
+  label: 'POSITIVE' | 'NEGATIVE';
+  score: number;
+  createdAt: string;
+  userId: User;
+}
 
 
 interface SignupRequest {
@@ -68,7 +79,6 @@ export const analyzeText = async (text: string): Promise<ResultProps> => {
 
 
 
-
 export async function toggle2FAFromBackend() {
   const token = useAuthStore.getState().token;
   if (!token) throw new Error("No token found. Please log in.");
@@ -86,3 +96,40 @@ export async function toggle2FAFromBackend() {
   return response.data;
 }
 
+export const getUserHistory = async (userId: string) => {
+  const token = useAuthStore.getState().token;
+  if (!token) throw new Error("No token found.");
+
+  try {
+    const response = await axios.get(
+      `http://localhost:5000/api/auth/history/${userId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data; // array of SentimentResult
+  } catch (error: any) {
+    const errorMsg = error.response?.data?.error || error.message;
+    console.error("Error fetching history:", errorMsg);
+    throw new Error("Failed to fetch history: " + errorMsg);
+  }
+};
+
+export const getAllHistories = async (): Promise<HistoryItem[]> => {
+  const token = useAuthStore.getState().token;
+  if (!token) throw new Error("Token not found");
+
+  try {
+    const response = await axios.get("http://localhost:5000/api/auth/history", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (err: any) {
+    const errorMsg = err.response?.data?.error || err.message;
+    throw new Error("Failed to fetch all histories: " + errorMsg);
+  }
+};

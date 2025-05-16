@@ -5,6 +5,8 @@ import DashboardLayout from "./layout/DashboardLayout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import Login from "./components/login/Login";
 import OTPVerification from "./components/OTPVerification";
+import UserHistory from "./components/UserHistory";
+import AllUsersData from "./components/AllUsersData";
 
 
 
@@ -34,9 +36,12 @@ export function App() {
             }
           >
             {customRoute("admin-home", <AdminDashboardPage />, ["admin"])}
+            {customRoute("all-users-data", <AllUsersData />, ["admin"])}
+           
           
             {customRoute("admin-loading", <p>loadingbar....</p>, ["admin"])}
             {customRoute("user-home", <UserDashboard />, ["user"])}
+            {customRoute("user-history", <UserHistory />, ["user"])}
           </Route>
         </Routes>
       </Suspense>
